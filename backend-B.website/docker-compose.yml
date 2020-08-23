@@ -1,0 +1,95 @@
+version: '3'
+
+networks:
+  backendB:
+
+services:
+  nginx:
+    container_name: backendBnginx
+    image: nginx
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./src:/var/www/html
+    ports:
+      - "8222:80"
+    networks:
+      - backendB
+    depends_on:
+      - php
+      - mysql
+      - npm
+      - composer
+      - phpmyadmin
+      - artisan
+  mysql:
+    container_name: backendBmysql
+    image: mysql:8.0.21
+    restart: unless-stopped
+    tty: true
+    env_file:
+      - mysql.env
+    volumes:
+      - ./mysql:/var/lib/mysql
+    networks:
+      - backendB
+    ports:
+      - "4402:3306"
+  php:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: backendBphp
+    volumes:
+      - ./src:/var/www/html
+    ports:
+      - "9002:9000"
+    networks:
+      - backendB
+  phpmyadmin:
+    container_name: backendBphpmyadmin
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    env_file:
+      - phpmyadmin.env
+    depends_on:
+      - php
+      - mysql
+    ports:
+      - "8802:80"
+    networks:
+      - backendB
+  composer:
+    container_name: backendBcomposer
+    image: composer:1.10.10
+    volumes:
+      - ./src:/var/www/html
+    working_dir: /var/www/html
+    depends_on:
+      - php
+    networks:
+      - backendB
+  npm:
+    container_name: backendBnpm
+    image: node:14.8.0
+    volumes:
+      - ./src:/var/www/html
+    working_dir: /var/www/html
+    entrypoint: ['npm']
+    depends_on:
+      - php
+    networks:
+      - backendB
+  artisan:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: backendBartisan
+    volumes:
+      - ./src:/var/www/html
+    depends_on:
+      - mysql
+      - php
+    working_dir: /var/www/html
+    entrypoint: ['php','/var/www/html/artisan']
+    networks:
+      backendB:
