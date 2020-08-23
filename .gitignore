@@ -1,0 +1,17 @@
+.idea
+frontend.vuejs/front-app/node_modules
+
+backend-A.website/mysql/*
+backend-B.website/mysql/*
+backend-C.website/mysql/*
+
+backend-A.website/src/vendor
+backend-A.website/src/node_modules
+
+backend-B.website/src/vendor
+backend-B.website/src/node_modules
+
+backend-C.website/src/vendor
+backend-C.website/src/node_modules
+
+frontend.vuejs/front-app/node_modules
