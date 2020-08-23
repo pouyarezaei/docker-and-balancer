@@ -1,0 +1,95 @@
+version: '3'
+
+networks:
+  backendA:
+
+services:
+  nginx:
+    container_name: backendAnginx
+    image: nginx
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./src:/var/www/html
+    ports:
+      - "8111:80"
+    networks:
+      - backendA
+    depends_on:
+      - php
+      - mysql
+      - npm
+      - composer
+      - phpmyadmin
+      - artisan
+  mysql:
+    container_name: backendAmysql
+    image: mysql:8.0.21
+    restart: unless-stopped
+    tty: true
+    env_file:
+      - mysql.env
+    volumes:
+      - ./mysql:/var/lib/mysql
+    networks:
+      - backendA
+    ports:
+      - "4401:3306"
+  php:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: backendAphp
+    volumes:
+      - ./src:/var/www/html
+    ports:
+      - "9001:9000"
+    networks:
+      - backendA
+  phpmyadmin:
+    container_name: backendAphpmyadmin
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    env_file:
+      - phpmyadmin.env
+    depends_on:
+      - php
+      - mysql
+    ports:
+      - "8801:80"
+    networks:
+      - backendA
+  composer:
+    container_name: backendAcomposer
+    image: composer:1.10.10
+    volumes:
+      - ./src:/var/www/html
+    working_dir: /var/www/html
+    depends_on:
+      - php
+    networks:
+      - backendA
+  npm:
+    container_name: backendAnpm
+    image: node:14.8.0
+    volumes:
+      - ./src:/var/www/html
+    working_dir: /var/www/html
+    entrypoint: ['npm']
+    depends_on:
+      - php
+    networks:
+      - backendA
+  artisan:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: backendAartisan
+    volumes:
+      - ./src:/var/www/html
+    depends_on:
+      - mysql
+      - php
+    working_dir: /var/www/html
+    entrypoint: ['php','/var/www/html/artisan']
+    networks:
+      backendA:
