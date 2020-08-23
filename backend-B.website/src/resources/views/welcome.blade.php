@@ -81,7 +81,7 @@
 
     <div class="content">
         <div class="title m-b-md">
-            From Backend A
+            From Backend B
         </div>
         <div class="title m-b-md">
             Laravel
